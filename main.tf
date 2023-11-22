@@ -1,6 +1,6 @@
 provider "aws" {
   region = "us-east-1"
-  shared_credentials_files = ["/Users/Anup/.aws/credentials"]
+  shared_credentials_files = ["/home/ec2-user/.aws/credentials"]
 }
 
 resource "aws_dynamodb_table" "rds_instances" {
@@ -63,7 +63,7 @@ resource "aws_iam_policy" "dynamodb_policy" {
         "dynamodb:Query",
         "dynamodb:Scan"
       ],
-      "Resource": aws_dynamodb_table.rds_instances.arn
+      "Resource": "${aws_dynamodb_table.rds_instances.arn}"
     }
   ]
 }
@@ -99,3 +99,4 @@ resource "aws_lambda_function" "get_rds_endpoints" {
 
   timeout = 30
 }
+
