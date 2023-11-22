@@ -33,7 +33,7 @@ resource "aws_iam_role" "lambda_execution_role" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Action": "sts:AssumeRole",
+      "Action": "sts:AssumeRole",               
       "Principal": {
         "Service": "lambda.amazonaws.com"
       },
@@ -70,10 +70,35 @@ resource "aws_iam_policy" "dynamodb_policy" {
 EOF
 }
 
+# IAM policy for logging from a lambda
+
+resource "aws_iam_policy" "iam_policy_for_lambda" {
+
+  name         = "aws_iam_policy_for_terraform_aws_lambda_role"
+  path         = "/"
+  description  = "AWS IAM Policy for managing aws lambda role"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*",
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_policy_attachment" "dynamodb_policy_attachment" {
   name       = "dynamodb_policy_attachment"
   roles      = [aws_iam_role.lambda_execution_role.name]
-  policy_arn = aws_iam_policy.dynamodb_policy.arn
+  policy_arn = aws_iam_policy.dynamodb_policy.iam_policy_for_lambda.arn
 }
 
 # Generates an archive from content, a file, or a directory of files.
@@ -100,3 +125,14 @@ resource "aws_lambda_function" "get_rds_endpoints" {
   timeout = 30
 }
 
+output "teraform_aws_role_output" {
+ value = aws_iam_role.lambda_execution_role.name
+}
+
+output "teraform_aws_role_arn_output" {
+ value = aws_iam_role.lambda_execution_role.arn
+}
+
+output "teraform_logging_arn_output" {
+ value = aws_iam_policy.iam_policy_for_lambda.arn
+}
